@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bomb Game</title>
+
+<style>
+body{
+  font-family: Arial;
+  text-align:center;
+  padding:20px;
+  background:#f4f4f4;
+}
+button{
+  padding:15px 25px;
+  font-size:18px;
+  margin:10px;
+}
+.words{
+  font-size:22px;
+  margin-top:20px;
+}
+.hidden{ color:#f4f4f4; }
+</style>
+</head>
+
+<body>
+
+<h1>Bomb Game</h1>
+
+<button onclick="generateRound()">Generate Round</button>
+<button onclick="revealBomb()">Reveal Bomb</button>
+<button onclick="nextGuess()">Next Guess Word</button>
+
+<div class="words" id="wordList"></div>
+<div class="words" id="bombWord"></div>
+<div class="words" id="guessWords"></div>
+
+<script>
+let listA=[], listB=[];
+let chosenWords=[], bomb="";
+let guessPool=[], guessIndex=0;
+
+// load word lists
+async function loadLists(){
+  listA = (await fetch('listA.txt').then(r=>r.text())).split(/\r?\n/).filter(Boolean);
+  listB = (await fetch('listB.txt').then(r=>r.text())).split(/\r?\n/).filter(Boolean);
+}
+loadLists();
+
+// shuffle helper
+function shuffle(arr){
+  return arr.sort(()=>Math.random()-0.5);
+}
+
+function generateRound(){
+  chosenWords = shuffle([...listA]).slice(0,10);
+  bomb = chosenWords[Math.floor(Math.random()*chosenWords.length)];
+  guessPool = shuffle([...listB]);
+  guessIndex = 0;
+
+  document.getElementById("wordList").innerHTML =
+    "<b>Words:</b><br>"+chosenWords.join("<br>");
+
+  document.getElementById("bombWord").innerHTML = "Bomb: ???";
+  document.getElementById("guessWords").innerHTML = "";
+}
+
+function revealBomb(){
+  document.getElementById("bombWord").innerHTML = "<b>BOMB:</b> "+bomb;
+}
+
+function nextGuess(){
+  if(guessIndex >= chosenWords.length-1) return;
+  document.getElementById("guessWords").innerHTML +=
+    (guessIndex+1)+". "+guessPool[guessIndex]+"<br>";
+  guessIndex++;
+}
+</script>
+
+</body>
+</html>
