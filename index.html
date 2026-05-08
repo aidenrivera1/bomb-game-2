@@ -65,10 +65,12 @@ input{
 <h2>Clue Giver</h2>
 
 <button onclick="generate()">Generate 10 Words</button>
+<button onclick="nextClue()">Next Clue</button>
 <button onclick="revealBomb()">Reveal Bomb</button>
 <button onclick="goHome()">Back</button>
 
 <div id="clueList"></div>
+<div id="clueFeed"></div>
 
 </div>
 
@@ -89,11 +91,16 @@ input{
 let words = [];
 let bomb = "";
 
-// LOAD WORDS
-let listA=[];
+let listA = [];
+let listB = [];
+let clueIndex = 0;
 
+// LOAD WORDS
 async function load(){
   listA = (await fetch('listA.txt').then(r=>r.text()))
+  .split(/\r?\n/).filter(Boolean);
+
+  listB = (await fetch('listB.txt').then(r=>r.text()))
   .split(/\r?\n/).filter(Boolean);
 }
 load();
@@ -123,6 +130,9 @@ function generate(){
   words = shuffle([...listA]).slice(0,10);
   bomb = words[Math.floor(Math.random()*words.length)];
 
+  clueIndex = 0;
+  clueFeed.innerHTML = "";
+
   let html = "";
 
   words.forEach(w=>{
@@ -135,6 +145,16 @@ function generate(){
   });
 
   clueList.innerHTML = html;
+}
+
+function nextClue(){
+  if(clueIndex >= listB.length) return;
+
+  let clue = listB[clueIndex];
+  let number = clueIndex + 1;
+
+  clueFeed.innerHTML += `<div>${number}. ${clue}</div>`;
+  clueIndex++;
 }
 
 function revealBomb(){
