@@ -94,6 +94,7 @@ let bomb = "";
 let listA = [];
 let listB = [];
 let clueIndex = 0;
+let cluePool = [];   // ✅ ADDED
 
 // LOAD WORDS
 async function load(){
@@ -133,6 +134,8 @@ function generate(){
   clueIndex = 0;
   clueFeed.innerHTML = "";
 
+  cluePool = shuffle([...listB]);   // ✅ FIX: RANDOMIZE LIST B ONCE
+
   let html = "";
 
   words.forEach(w=>{
@@ -148,9 +151,9 @@ function generate(){
 }
 
 function nextClue(){
-  if(clueIndex >= listB.length) return;
+  if(clueIndex >= cluePool.length) return;   // ✅ FIXED
 
-  let clue = listB[clueIndex];
+  let clue = cluePool[clueIndex];            // ✅ FIXED
   let number = clueIndex + 1;
 
   clueFeed.innerHTML += `<div>${number}. ${clue}</div>`;
