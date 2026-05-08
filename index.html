@@ -11,71 +11,160 @@ body{
   padding:20px;
   background:#f4f4f4;
 }
+
 button{
   padding:15px 25px;
   font-size:18px;
   margin:10px;
 }
-.words{
-  font-size:22px;
-  margin-top:20px;
+
+table{
+  margin:auto;
+  border-collapse:collapse;
 }
-.hidden{ color:#f4f4f4; }
+
+td{
+  padding:8px;
+}
+
+input{
+  padding:6px;
+  font-size:16px;
+}
+
+.wordRow{
+  background:white;
+  margin:5px auto;
+  padding:10px;
+  width:90%;
+  max-width:600px;
+  display:flex;
+  justify-content:space-between;
+  border-radius:6px;
+}
+
+.bomb{
+  color:red;
+  font-weight:bold;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Bomb Game</h1>
+<h1>💣 Bomb Game</h1>
 
-<button onclick="generateRound()">Generate Round</button>
+<div id="home">
+  <button onclick="show('clue')">Clue Giver</button>
+  <button onclick="show('defuse')">Defuser</button>
+</div>
+
+<!-- CLUE GIVER -->
+<div id="cluePage" style="display:none">
+
+<h2>Clue Giver</h2>
+
+<button onclick="generate()">Generate 10 Words</button>
 <button onclick="revealBomb()">Reveal Bomb</button>
-<button onclick="nextGuess()">Next Guess Word</button>
+<button onclick="goHome()">Back</button>
 
-<div class="words" id="wordList"></div>
-<div class="words" id="bombWord"></div>
-<div class="words" id="guessWords"></div>
+<div id="clueList"></div>
+
+</div>
+
+<!-- DEFUSER -->
+<div id="defusePage" style="display:none">
+
+<h2>Defusers</h2>
+
+<button onclick="makeDefuse()">Create Sheet</button>
+<button onclick="goHome()">Back</button>
+
+<div id="defuseList"></div>
+
+</div>
 
 <script>
-let listA=[], listB=[];
-let chosenWords=[], bomb="";
-let guessPool=[], guessIndex=0;
 
-// load word lists
-async function loadLists(){
-  listA = (await fetch('listA.txt').then(r=>r.text())).split(/\r?\n/).filter(Boolean);
-  listB = (await fetch('listB.txt').then(r=>r.text())).split(/\r?\n/).filter(Boolean);
+let words = [];
+let bomb = "";
+
+// LOAD WORDS
+let listA=[];
+
+async function load(){
+  listA = (await fetch('listA.txt').then(r=>r.text()))
+  .split(/\r?\n/).filter(Boolean);
 }
-loadLists();
+load();
 
-// shuffle helper
+function show(page){
+  home.style.display="none";
+  cluePage.style.display="none";
+  defusePage.style.display="none";
+
+  if(page==="clue") cluePage.style.display="block";
+  if(page==="defuse") defusePage.style.display="block";
+}
+
+function goHome(){
+  home.style.display="block";
+  cluePage.style.display="none";
+  defusePage.style.display="none";
+}
+
 function shuffle(arr){
   return arr.sort(()=>Math.random()-0.5);
 }
 
-function generateRound(){
-  chosenWords = shuffle([...listA]).slice(0,10);
-  bomb = chosenWords[Math.floor(Math.random()*chosenWords.length)];
-  guessPool = shuffle([...listB]);
-  guessIndex = 0;
+/* ---------------- CLUE GIVER ---------------- */
 
-  document.getElementById("wordList").innerHTML =
-    "<b>Words:</b><br>"+chosenWords.join("<br>");
+function generate(){
+  words = shuffle([...listA]).slice(0,10);
+  bomb = words[Math.floor(Math.random()*words.length)];
 
-  document.getElementById("bombWord").innerHTML = "Bomb: ???";
-  document.getElementById("guessWords").innerHTML = "";
+  let html = "";
+
+  words.forEach(w=>{
+    html += `
+      <div class="wordRow" id="${w}">
+        <div>${w}</div>
+        <input placeholder="clue for ${w}">
+      </div>
+    `;
+  });
+
+  clueList.innerHTML = html;
 }
 
 function revealBomb(){
-  document.getElementById("bombWord").innerHTML = "<b>BOMB:</b> "+bomb;
+  let rows = document.querySelectorAll(".wordRow");
+
+  rows.forEach(r=>{
+    if(r.id === bomb){
+      r.classList.add("bomb");
+    }
+  });
 }
 
-function nextGuess(){
-  if(guessIndex >= chosenWords.length-1) return;
-  document.getElementById("guessWords").innerHTML +=
-    (guessIndex+1)+". "+guessPool[guessIndex]+"<br>";
-  guessIndex++;
+/* ---------------- DEFUSER ---------------- */
+
+function makeDefuse(){
+
+  let html = "";
+
+  for(let i=0;i<10;i++){
+    html += `
+      <div class="wordRow">
+        <input placeholder="Word ${i+1}">
+        <input placeholder="Clue you hear">
+      </div>
+    `;
+  }
+
+  defuseList.innerHTML = html;
 }
+
 </script>
 
 </body>
